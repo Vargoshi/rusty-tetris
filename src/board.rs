@@ -76,6 +76,9 @@ impl Board {
                             }
                         }
                     }
+
+                    self.try_clear();
+
                     self.block.pos.y = 0;
                 } else {
                     self.block.pos.y += 1;
@@ -115,6 +118,31 @@ impl Board {
             }
         }
         false
+    }
+
+    fn try_clear(&mut self) {
+        for y in 0..HEIGHT {
+            if self.should_clear(y) {
+                self.clear(y);
+            }
+        }
+    }
+
+    fn should_clear(&mut self, row: usize) -> bool {
+        for x in 0..WIDTH {
+            if self.cells[row][x] == false {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn clear(&mut self, row: usize) {
+        for y in (0..row).rev() {
+            for x in 0..WIDTH {
+                self.cells[y + 1][x] = self.cells[y][x];
+            }
+        }
     }
 }
 

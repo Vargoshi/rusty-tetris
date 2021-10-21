@@ -1,24 +1,21 @@
 use std::io;
 
-use crossterm::{cursor, event, style, terminal, ExecutableCommand};
+use crossterm::{event, terminal, ExecutableCommand};
+
+use crate::{block::Block, draw::draw_char};
 
 const WIDTH: usize = 10;
 const HEIGHT: usize = 20;
 
-struct Pos {
-    x: usize,
-    y: usize,
-}
-
 pub struct Board {
-    pos: Pos,
+    block: Block,
     cells: [[bool; WIDTH]; HEIGHT],
 }
 
 impl Board {
     pub fn new() -> Self {
         Self {
-            pos: Pos { x: 5, y: 5 },
+            block: Block::new(crate::block::BlockType::Square, WIDTH as isize / 2, 0),
             cells: Default::default(),
         }
     }
@@ -29,7 +26,7 @@ impl Board {
         for y in 0..HEIGHT + 2 {
             for x in 0..WIDTH + 2 {
                 if y == 0 || y == HEIGHT + 1 || x == 0 || x == WIDTH + 1 {
-                    draw_char(x, y, '+')?;
+                    draw_char(x as isize, y as isize, '+')?;
                 }
             }
         }
@@ -37,12 +34,12 @@ impl Board {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
-                    draw_char(x + 1, y + 1, '@')?;
+                    draw_char(x as isize + 1, y as isize + 1, '@')?;
                 }
             }
         }
 
-        draw_char(self.pos.x + 1, self.pos.y + 1, '#')?;
+        self.block.draw()?;
 
         Ok(())
     }
@@ -64,29 +61,60 @@ impl Board {
     fn mv(&mut self, dir: Dir) {
         match dir {
             Dir::Up => {
-                if self.pos.y > 0 {
-                    self.pos.y -= 1
-                }
+                // if self.block.pos.y > 0 {
+                //     self.block.pos.y -= 1
+                // }
             }
             Dir::Down => {
-                if self.pos.y >= HEIGHT - 1 || self.cells[self.pos.y + 1][self.pos.x] {
-                    self.cells[self.pos.y][self.pos.x] = true;
-                    self.pos.y = 0;
+                if self.is_collision(0, 1) {
+                    for y in 0..4 {
+                        for x in 0..4 {
+                            if self.block.cells[y][x] {
+                                let abs_x = (self.block.pos.y + y as isize) as usize;
+                                let abs_y = (self.block.pos.x + x as isize) as usize;
+                                self.cells[abs_x][abs_y] = true;
+                            }
+                        }
+                    }
+                    self.block.pos.y = 0;
                 } else {
-                    self.pos.y += 1;
+                    self.block.pos.y += 1;
                 }
             }
+
             Dir::Left => {
-                if self.pos.x > 0 {
-                    self.pos.x -= 1
+                if !self.is_collision(-1, 0) {
+                    self.block.pos.x -= 1
                 }
             }
+
             Dir::Right => {
-                if self.pos.x < WIDTH - 1 {
-                    self.pos.x += 1
+                if !self.is_collision(1, 0) {
+                    self.block.pos.x += 1
                 }
             }
         }
+    }
+
+    fn is_collision(&self, dx: isize, dy: isize) -> bool {
+        for y in 0..4 {
+            for x in 0..4 {
+                if self.block.cells[y][x] {
+                    let abs_x = self.block.pos.x + x as isize + dx;
+                    let abs_y = self.block.pos.y + y as isize + dy;
+
+                    if abs_y >= HEIGHT as isize
+                        || abs_y < 0
+                        || abs_x >= WIDTH as isize
+                        || abs_x < 0
+                        || self.cells[abs_y as usize][abs_x as usize]
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 }
 
@@ -95,11 +123,4 @@ enum Dir {
     Right,
     Up,
     Down,
-}
-
-fn draw_char(x: usize, y: usize, c: char) -> Result<(), io::Error> {
-    io::stdout()
-        .execute(cursor::MoveTo(x as u16, y as u16))?
-        .execute(style::Print(c))?;
-    Ok(())
 }

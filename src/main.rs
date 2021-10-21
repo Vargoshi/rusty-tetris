@@ -1,5 +1,6 @@
 mod block;
 mod board;
+mod draw;
 
 use board::Board;
 use crossterm::{event, terminal};

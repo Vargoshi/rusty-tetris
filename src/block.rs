@@ -1,3 +1,5 @@
+use crate::draw::draw_char;
+
 pub enum BlockType {
     Square,
     L,
@@ -6,8 +8,17 @@ pub enum BlockType {
     T,
 }
 
+const WIDTH: usize = 4;
+const HEIGHT: usize = 4;
+
 pub struct Block {
-    cells: [[bool; 4]; 4],
+    pub pos: Pos,
+    pub cells: [[bool; WIDTH]; HEIGHT],
+}
+
+pub struct Pos {
+    pub x: isize,
+    pub y: isize,
 }
 
 pub enum Dir {
@@ -16,8 +27,9 @@ pub enum Dir {
 }
 
 impl Block {
-    pub fn new(variant: BlockType) -> Self {
+    pub fn new(variant: BlockType, x: isize, y: isize) -> Self {
         Self {
+            pos: Pos { x, y },
             cells: match variant {
                 BlockType::Square => [
                     [false, false, false, false],
@@ -72,23 +84,22 @@ impl Block {
         self.cells = rotated;
     }
 
-    pub fn draw(&self) {
-        for y in 0..4 {
-            for x in 0..4 {
-                if self.cells[y][x] == true {
-                    print!("#");
-                } else {
-                    print!(" ");
+    pub fn draw(&self) -> crossterm::Result<()> {
+        for y in 0..HEIGHT {
+            for x in 0..WIDTH {
+                if self.cells[y][x] {
+                    draw_char(self.pos.x + x as isize + 1, self.pos.y + y as isize + 1, '#')?;
                 }
             }
-            println!();
         }
+
+        Ok(())
     }
 }
 
 #[test]
 fn rotate_block() {
-    let mut block = Block::new(BlockType::L);
+    let mut block = Block::new(BlockType::L, 0, 0);
     block.rotate(Dir::Clockwise);
     assert_eq!(
         block.cells,

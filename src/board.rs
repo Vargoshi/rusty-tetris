@@ -13,7 +13,7 @@ const HEIGHT: usize = 20;
 pub struct Board {
     block: Block,
     cells: [[bool; WIDTH]; HEIGHT],
-    score: usize,
+    pub score: usize,
 }
 
 impl Board {

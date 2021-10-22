@@ -8,6 +8,20 @@ pub enum BlockType {
     T,
 }
 
+impl BlockType {
+    pub fn rand() -> Self {
+        let x: u16 = rand::random();
+        match x % 5 {
+            0 => BlockType::Square,
+            1 => BlockType::L,
+            2 => BlockType::I,
+            3 => BlockType::Z,
+            4 => BlockType::T,
+            _ => unreachable!(),
+        }
+    }
+}
+
 const WIDTH: usize = 4;
 const HEIGHT: usize = 4;
 

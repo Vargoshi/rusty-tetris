@@ -3,7 +3,7 @@ use std::io;
 use crossterm::{event, terminal, ExecutableCommand};
 
 use crate::{
-    block::{Block, RotDir},
+    block::{Block, BlockType, RotDir},
     draw::draw_char,
 };
 
@@ -18,7 +18,7 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         Self {
-            block: Block::new(crate::block::BlockType::L, WIDTH as isize / 2, 0),
+            block: Block::new(BlockType::rand(), WIDTH as isize / 2, 0),
             cells: Default::default(),
         }
     }
@@ -91,7 +91,6 @@ impl Board {
                 if self.is_collision(0, 1) {
                     self.drop_block();
                     self.try_clear();
-                    self.block.pos.y = 0;
                 } else {
                     self.block.pos.y += 1;
                 }
@@ -164,6 +163,7 @@ impl Board {
                 }
             }
         }
+        self.block = Block::new(BlockType::rand(), WIDTH as isize / 2, 0);
     }
 
     fn try_clear(&mut self) {

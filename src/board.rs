@@ -49,10 +49,18 @@ impl Board {
 
     pub fn input(&mut self, code: event::KeyCode) {
         match code {
-            event::KeyCode::Up => self.mv(Dir::Up),
-            event::KeyCode::Down => self.mv(Dir::Down),
-            event::KeyCode::Left => self.mv(Dir::Left),
-            event::KeyCode::Right => self.mv(Dir::Right),
+            event::KeyCode::Up => {
+                self.mv(Dir::Up);
+            }
+            event::KeyCode::Down => {
+                self.mv(Dir::Down);
+            }
+            event::KeyCode::Left => {
+                self.mv(Dir::Left);
+            }
+            event::KeyCode::Right => {
+                self.mv(Dir::Right);
+            }
             event::KeyCode::Char(' ') => self.rotate(),
             _ => {}
         }
@@ -76,36 +84,37 @@ impl Board {
         }
     }
 
-    pub fn step(&mut self) {
-        self.mv(Dir::Down);
+    pub fn step(&mut self) -> bool {
+        self.mv(Dir::Down)
     }
 
-    fn mv(&mut self, dir: Dir) {
+    fn mv(&mut self, dir: Dir) -> bool {
         match dir {
-            Dir::Up => {
-                // if self.block.pos.y > 0 {
-                //     self.block.pos.y -= 1
-                // }
-            }
+            Dir::Up => false,
             Dir::Down => {
                 if self.is_collision(0, 1) {
                     self.drop_block();
                     self.try_clear();
+                    self.block = Block::new(BlockType::rand(), WIDTH as isize / 2, 0);
+                    if self.is_collision(0, 0) {
+                        return true;
+                    }
                 } else {
                     self.block.pos.y += 1;
                 }
+                false
             }
-
             Dir::Left => {
                 if !self.is_collision(-1, 0) {
                     self.block.pos.x -= 1
                 }
+                false
             }
-
             Dir::Right => {
                 if !self.is_collision(1, 0) {
                     self.block.pos.x += 1
                 }
+                false
             }
         }
     }
@@ -163,7 +172,6 @@ impl Board {
                 }
             }
         }
-        self.block = Block::new(BlockType::rand(), WIDTH as isize / 2, 0);
     }
 
     fn try_clear(&mut self) {

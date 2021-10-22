@@ -53,7 +53,7 @@ impl Block {
                     [false, false, false, false],
                 ],
                 BlockType::L => [
-                    [false, true, false, false],
+                    [false, false, false, false],
                     [false, true, false, false],
                     [false, true, false, false],
                     [false, true, true, false],

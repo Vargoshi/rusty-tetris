@@ -67,18 +67,8 @@ impl Board {
             }
             Dir::Down => {
                 if self.is_collision(0, 1) {
-                    for y in 0..4 {
-                        for x in 0..4 {
-                            if self.block.cells[y][x] {
-                                let abs_x = (self.block.pos.y + y as isize) as usize;
-                                let abs_y = (self.block.pos.x + x as isize) as usize;
-                                self.cells[abs_x][abs_y] = true;
-                            }
-                        }
-                    }
-
+                    self.drop_block();
                     self.try_clear();
-
                     self.block.pos.y = 0;
                 } else {
                     self.block.pos.y += 1;
@@ -118,6 +108,19 @@ impl Board {
             }
         }
         false
+    }
+
+    /// Adds cells of the currently falling block to the board cells.
+    fn drop_block(&mut self) {
+        for y in 0..4 {
+            for x in 0..4 {
+                if self.block.cells[y][x] {
+                    let abs_x = (self.block.pos.y + y as isize) as usize;
+                    let abs_y = (self.block.pos.x + x as isize) as usize;
+                    self.cells[abs_x][abs_y] = true;
+                }
+            }
+        }
     }
 
     fn try_clear(&mut self) {

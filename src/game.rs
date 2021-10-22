@@ -9,19 +9,18 @@ pub enum Game {
 impl Game {
     pub(crate) fn draw(&self) -> crossterm::Result<()> {
         use crossterm::{cursor, style, terminal, ExecutableCommand};
+        let (w, h) = terminal::size()?;
         match self {
             Self::Start => {
                 let msg = "Press SPACE to start";
-                let (w, h) = terminal::size()?;
                 std::io::stdout().execute(terminal::Clear(terminal::ClearType::All))?;
                 std::io::stdout()
                     .execute(cursor::MoveTo(w / 2 - msg.len() as u16 / 2, h / 2))?
                     .execute(style::Print(msg))?;
             }
-            Self::Play(board) => board.draw()?,
+            Self::Play(board) => board.draw(w as isize/2,h as isize/2)?,
             Self::Over => {
                 let msg = "GAME OVER";
-                let (w, h) = terminal::size()?;
                 std::io::stdout().execute(terminal::Clear(terminal::ClearType::All))?;
                 std::io::stdout()
                     .execute(cursor::MoveTo(w / 2 - msg.len() as u16 / 2, h / 2))?
@@ -55,7 +54,7 @@ impl Game {
                 if board.step() {
                     *self = Self::Over;
                 }
-            },
+            }
             Self::Over => {}
         }
     }

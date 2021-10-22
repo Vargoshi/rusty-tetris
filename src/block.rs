@@ -102,13 +102,13 @@ impl Block {
         }
     }
 
-    pub fn draw(&self) -> crossterm::Result<()> {
+    pub fn draw(&self, pos_x: isize, pos_y: isize) -> crossterm::Result<()> {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
                     draw_char(
-                        self.pos.x + x as isize + 1,
-                        self.pos.y + y as isize + 1,
+                        self.pos.x + x as isize + pos_x as isize,
+                        self.pos.y + y as isize + pos_y as isize,
                         '#',
                     )?;
                 }

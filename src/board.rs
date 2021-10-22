@@ -23,13 +23,15 @@ impl Board {
         }
     }
 
-    pub fn draw(&self) -> crossterm::Result<()> {
+    pub fn draw(&self, pos_x: isize, pos_y: isize) -> crossterm::Result<()> {
         io::stdout().execute(terminal::Clear(terminal::ClearType::All))?;
+        let abs_x = pos_x - (WIDTH as isize + 2) / 2;
+        let abs_y = pos_y - (HEIGHT as isize + 2) / 2;
 
         for y in 0..HEIGHT + 2 {
             for x in 0..WIDTH + 2 {
                 if y == 0 || y == HEIGHT + 1 || x == 0 || x == WIDTH + 1 {
-                    draw_char(x as isize, y as isize, '+')?;
+                    draw_char(abs_x + x as isize, abs_y + y as isize, '+')?;
                 }
             }
         }
@@ -37,12 +39,12 @@ impl Board {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
-                    draw_char(x as isize + 1, y as isize + 1, '@')?;
+                    draw_char(abs_x+ 1 + x as isize , abs_y+ 1 + y as isize, '@')?;
                 }
             }
         }
-
-        self.block.draw()?;
+        
+        self.block.draw(abs_x+1,abs_y+1)?;
 
         Ok(())
     }

@@ -87,7 +87,6 @@ impl Board {
         rotated.pos.x -= 2;
         if !self.is_block_collision(&rotated) {
             self.block = rotated;
-            return;
         }
     }
 
@@ -198,7 +197,7 @@ impl Board {
 
     fn should_clear(&mut self, row: usize) -> bool {
         for x in 0..WIDTH {
-            if self.cells[row][x] == false {
+            if !self.cells[row][x] {
                 return false;
             }
         }

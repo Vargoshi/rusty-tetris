@@ -3,7 +3,7 @@ use crate::draw::{clear, draw_text};
 
 pub enum Game {
     Start,
-    Play(Board),
+    Play(Box<Board>),
     Over { score: usize },
 }
 
@@ -17,7 +17,7 @@ impl Game {
                 draw_text(
                     w as isize / 2 - msg.len() as isize / 2,
                     h as isize / 2,
-                    &msg,
+                    msg,
                 )?;
             }
             Self::Play(board) => board.draw(w as isize / 2, h as isize / 2)?,
@@ -28,7 +28,7 @@ impl Game {
                 draw_text(
                     w as isize / 2 - msg.len() as isize / 2,
                     h as isize / 2,
-                    &msg,
+                    msg,
                 )?;
                 draw_text(
                     w as isize / 2 - score_msg.len() as isize / 2,
@@ -45,7 +45,7 @@ impl Game {
         match self {
             Self::Start => {
                 if let KeyCode::Char(' ') = code {
-                    *self = Self::Play(Board::new());
+                    *self = Self::Play(Box::new(Board::new()));
                 }
             }
             Self::Play(board) => board.input(code),

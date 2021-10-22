@@ -36,6 +36,7 @@ pub struct Pos {
     pub y: isize,
 }
 
+#[allow(dead_code)]
 pub enum RotDir {
     Clockwise,
     CounterClockwise,
@@ -84,6 +85,7 @@ impl Block {
         let mut rotated = [[false; 4]; 4];
 
         for y in 0..4 {
+            #[allow(clippy::needless_range_loop)]
             for x in 0..4 {
                 match dir {
                     RotDir::Clockwise => {

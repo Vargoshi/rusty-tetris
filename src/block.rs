@@ -1,4 +1,4 @@
-use crate::draw::draw_char;
+use crate::draw::draw_text;
 
 pub enum BlockType {
     Square,
@@ -106,10 +106,10 @@ impl Block {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
-                    draw_char(
+                    draw_text(
                         self.pos.x + x as isize + pos_x as isize,
                         self.pos.y + y as isize + pos_y as isize,
-                        '#',
+                        "#",
                     )?;
                 }
             }

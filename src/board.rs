@@ -4,7 +4,7 @@ use crossterm::{event, terminal, ExecutableCommand};
 
 use crate::{
     block::{Block, BlockType, RotDir},
-    draw::draw_char,
+    draw::draw_text,
 };
 
 const WIDTH: usize = 10;
@@ -13,6 +13,7 @@ const HEIGHT: usize = 20;
 pub struct Board {
     block: Block,
     cells: [[bool; WIDTH]; HEIGHT],
+    score: usize,
 }
 
 impl Board {
@@ -20,6 +21,7 @@ impl Board {
         Self {
             block: Block::new(BlockType::rand(), WIDTH as isize / 2, 0),
             cells: Default::default(),
+            score: 0,
         }
     }
 
@@ -31,7 +33,7 @@ impl Board {
         for y in 0..HEIGHT + 2 {
             for x in 0..WIDTH + 2 {
                 if y == 0 || y == HEIGHT + 1 || x == 0 || x == WIDTH + 1 {
-                    draw_char(abs_x + x as isize, abs_y + y as isize, '+')?;
+                    draw_text(abs_x + x as isize, abs_y + y as isize, "+")?;
                 }
             }
         }
@@ -39,12 +41,15 @@ impl Board {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
-                    draw_char(abs_x+ 1 + x as isize , abs_y+ 1 + y as isize, '@')?;
+                    draw_text(abs_x + 1 + x as isize, abs_y + 1 + y as isize, "@")?;
                 }
             }
         }
-        
-        self.block.draw(abs_x+1,abs_y+1)?;
+
+        self.block.draw(abs_x + 1, abs_y + 1)?;
+
+        let msg = format!("Score: {}", self.score);
+        draw_text(abs_x, abs_y + HEIGHT as isize + 3, &msg)?;
 
         Ok(())
     }
@@ -177,10 +182,17 @@ impl Board {
     }
 
     fn try_clear(&mut self) {
+        let mut lines = Vec::new();
+
         for y in 0..HEIGHT {
             if self.should_clear(y) {
                 self.clear(y);
+                lines.push(HEIGHT - y);
             }
+        }
+
+        for line in &lines {
+            self.score += get_score(*line, lines.len());
         }
     }
 
@@ -199,6 +211,20 @@ impl Board {
                 self.cells[y + 1][x] = self.cells[y][x];
             }
         }
+    }
+}
+
+/// Calculate score for removed line.
+/// `y` - Line number counting from bottom (1 is first).
+/// `lines` - number of lines removed in total.
+pub fn get_score(y: usize, lines: usize) -> usize {
+    match lines {
+        0 => 0,
+        1 => 40 * y,
+        2 => 100 * y,
+        3 => 300 * y,
+        4 => 1200 * y,
+        _ => unreachable!(),
     }
 }
 

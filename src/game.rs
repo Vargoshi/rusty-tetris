@@ -1,4 +1,5 @@
 use crate::board::Board;
+use crate::draw::{clear, draw_text};
 
 pub enum Game {
     Start,
@@ -8,23 +9,26 @@ pub enum Game {
 
 impl Game {
     pub(crate) fn draw(&self) -> crossterm::Result<()> {
-        use crossterm::{cursor, style, terminal, ExecutableCommand};
-        let (w, h) = terminal::size()?;
+        let (w, h) = crossterm::terminal::size()?;
         match self {
             Self::Start => {
                 let msg = "Press SPACE to start";
-                std::io::stdout().execute(terminal::Clear(terminal::ClearType::All))?;
-                std::io::stdout()
-                    .execute(cursor::MoveTo(w / 2 - msg.len() as u16 / 2, h / 2))?
-                    .execute(style::Print(msg))?;
+                clear()?;
+                draw_text(
+                    w as isize / 2 - msg.len() as isize / 2,
+                    h as isize / 2,
+                    &msg,
+                )?;
             }
-            Self::Play(board) => board.draw(w as isize/2,h as isize/2)?,
+            Self::Play(board) => board.draw(w as isize / 2, h as isize / 2)?,
             Self::Over => {
                 let msg = "GAME OVER";
-                std::io::stdout().execute(terminal::Clear(terminal::ClearType::All))?;
-                std::io::stdout()
-                    .execute(cursor::MoveTo(w / 2 - msg.len() as u16 / 2, h / 2))?
-                    .execute(style::Print(msg))?;
+                clear()?;
+                draw_text(
+                    w as isize / 2 - msg.len() as isize / 2,
+                    h as isize / 2,
+                    &msg,
+                )?;
             }
         }
         Ok(())

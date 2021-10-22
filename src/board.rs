@@ -2,7 +2,10 @@ use std::io;
 
 use crossterm::{event, terminal, ExecutableCommand};
 
-use crate::{block::Block, draw::draw_char};
+use crate::{
+    block::{Block, RotDir},
+    draw::draw_char,
+};
 
 const WIDTH: usize = 10;
 const HEIGHT: usize = 20;
@@ -15,7 +18,7 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         Self {
-            block: Block::new(crate::block::BlockType::Square, WIDTH as isize / 2, 0),
+            block: Block::new(crate::block::BlockType::L, WIDTH as isize / 2, 0),
             cells: Default::default(),
         }
     }
@@ -50,7 +53,26 @@ impl Board {
             event::KeyCode::Down => self.mv(Dir::Down),
             event::KeyCode::Left => self.mv(Dir::Left),
             event::KeyCode::Right => self.mv(Dir::Right),
+            event::KeyCode::Char(' ') => self.rotate(),
             _ => {}
+        }
+    }
+
+    fn rotate(&mut self) {
+        let mut rotated = self.block.rotate(RotDir::Clockwise);
+        if !self.is_block_collision(&rotated) {
+            self.block = rotated;
+            return;
+        }
+        rotated.pos.x += 1;
+        if !self.is_block_collision(&rotated) {
+            self.block = rotated;
+            return;
+        }
+        rotated.pos.x -= 2;
+        if !self.is_block_collision(&rotated) {
+            self.block = rotated;
+            return;
         }
     }
 
@@ -95,6 +117,27 @@ impl Board {
                 if self.block.cells[y][x] {
                     let abs_x = self.block.pos.x + x as isize + dx;
                     let abs_y = self.block.pos.y + y as isize + dy;
+
+                    if abs_y >= HEIGHT as isize
+                        || abs_y < 0
+                        || abs_x >= WIDTH as isize
+                        || abs_x < 0
+                        || self.cells[abs_y as usize][abs_x as usize]
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        false
+    }
+
+    fn is_block_collision(&self, block: &Block) -> bool {
+        for y in 0..4 {
+            for x in 0..4 {
+                if block.cells[y][x] {
+                    let abs_x = block.pos.x + x as isize;
+                    let abs_y = block.pos.y + y as isize;
 
                     if abs_y >= HEIGHT as isize
                         || abs_y < 0

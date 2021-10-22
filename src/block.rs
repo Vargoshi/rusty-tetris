@@ -16,12 +16,13 @@ pub struct Block {
     pub cells: [[bool; WIDTH]; HEIGHT],
 }
 
+#[derive(Clone, Copy)]
 pub struct Pos {
     pub x: isize,
     pub y: isize,
 }
 
-pub enum Dir {
+pub enum RotDir {
     Clockwise,
     CounterClockwise,
 }
@@ -65,30 +66,37 @@ impl Block {
         }
     }
 
-    pub fn rotate(&mut self, dir: Dir) {
+    pub fn rotate(&self, dir: RotDir) -> Self {
         let mut rotated = [[false; 4]; 4];
 
         for y in 0..4 {
             for x in 0..4 {
                 match dir {
-                    Dir::Clockwise => {
+                    RotDir::Clockwise => {
                         rotated[x][y] = self.cells[3 - y][x];
                     }
-                    Dir::CounterClockwise => {
+                    RotDir::CounterClockwise => {
                         rotated[x][y] = self.cells[y][3 - x];
                     }
                 }
             }
         }
 
-        self.cells = rotated;
+        Self {
+            cells: rotated,
+            pos: self.pos,
+        }
     }
 
     pub fn draw(&self) -> crossterm::Result<()> {
         for y in 0..HEIGHT {
             for x in 0..WIDTH {
                 if self.cells[y][x] {
-                    draw_char(self.pos.x + x as isize + 1, self.pos.y + y as isize + 1, '#')?;
+                    draw_char(
+                        self.pos.x + x as isize + 1,
+                        self.pos.y + y as isize + 1,
+                        '#',
+                    )?;
                 }
             }
         }
@@ -100,7 +108,7 @@ impl Block {
 #[test]
 fn rotate_block() {
     let mut block = Block::new(BlockType::L, 0, 0);
-    block.rotate(Dir::Clockwise);
+    block = block.rotate(RotDir::Clockwise);
     assert_eq!(
         block.cells,
         [

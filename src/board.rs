@@ -1,11 +1,6 @@
-use sdl2::{
-    keyboard::Keycode,
-    rect::{Point, Rect},
-    render::Canvas,
-    video::Window,
-};
+use sdl2::{keyboard::Keycode, rect::{Point, Rect}, render::Canvas, ttf::Font, video::Window};
 
-use crate::block::{Block, BlockType, RotDir, BLOCK_SIZE};
+use crate::{block::{Block, BlockType, RotDir, BLOCK_SIZE}, draw::draw_text};
 
 pub struct Board {
     size: Point,
@@ -26,7 +21,7 @@ impl Board {
         }
     }
 
-    pub fn draw(&self, canvas: &mut Canvas<Window>, rect: Rect) -> Result<(), String> {
+    pub fn draw(&self, canvas: &mut Canvas<Window>, rect: Rect, font: &Font) -> Result<(), String> {
         // Border
         canvas.set_draw_color(sdl2::pixels::Color::RGBA(200, 200, 200, 255));
         canvas.draw_rect(Rect::new(
@@ -63,6 +58,7 @@ impl Board {
         )?;
 
         let msg = format!("Score: {}", self.score);
+        draw_text(canvas, font, Point::new(400, 100), &msg, 0.2)?;
         // draw_text(abs_x, abs_y + HEIGHT as isize + 3, &msg)?;
 
         Ok(())

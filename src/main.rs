@@ -3,28 +3,39 @@ mod board;
 mod draw;
 mod game;
 
+use std::path::Path;
+
 use draw::{SCREEN_HEIGHT, SCREEN_WIDTH};
 use game::Game;
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init()?;
+
     let video_subsystem = sdl_context.video()?;
+
     let window = video_subsystem
         .window("SDL2", SCREEN_WIDTH, SCREEN_HEIGHT)
         .position_centered()
         .build()
         .map_err(|e| e.to_string())?;
+
     let mut canvas = window
         .into_canvas()
         .accelerated()
         .build()
         .map_err(|e| e.to_string())?;
-    let texture_creator = canvas.texture_creator();
+
+    let ttf_context = sdl2::ttf::init().map_err(|e| e.to_string())?;
+
+    let mut font = ttf_context.load_font(Path::new("assets/OpenSans-Bold.ttf"), 128)?;
+    font.set_style(sdl2::ttf::FontStyle::BOLD);
 
     let timer = sdl_context.timer()?;
+
     let mut event_pump = sdl_context.event_pump()?;
 
     let mut game = Game::Start;
+
     let mut last_step = std::time::Instant::now();
 
     'running: loop {
@@ -49,7 +60,7 @@ fn main() -> Result<(), String> {
         }
         canvas.set_draw_color(sdl2::pixels::Color::RGBA(0, 0, 0, 255));
         canvas.clear();
-        game.draw(&mut canvas)?;
+        game.draw(&mut canvas, &font)?;
         canvas.present();
 
         ::std::thread::sleep(std::time::Duration::from_millis(1000 / 30));

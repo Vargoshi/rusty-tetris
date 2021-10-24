@@ -130,7 +130,7 @@ fn rotate_block() {
         block.cells,
         [
             [false, false, false, false],
-            [true, true, true, true],
+            [true, true, true, false],
             [true, false, false, false],
             [false, false, false, false],
         ]

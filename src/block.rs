@@ -25,6 +25,7 @@ impl BlockType {
 const WIDTH: usize = 4;
 const HEIGHT: usize = 4;
 
+#[derive(Clone, Copy)]
 pub struct Block {
     pub pos: Pos,
     pub cells: [[bool; WIDTH]; HEIGHT],

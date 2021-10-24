@@ -74,19 +74,19 @@ impl Board {
     }
 
     fn rotate(&mut self) {
-        let mut rotated = self.block.rotate(RotDir::Clockwise);
-        if !self.is_block_collision(&rotated) {
-            self.block = rotated;
+        let mut rotated_block = self.block.rotate(RotDir::Clockwise);
+        if !self.check_collision(&rotated_block) {
+            self.block = rotated_block;
             return;
         }
-        rotated.pos.x += 1;
-        if !self.is_block_collision(&rotated) {
-            self.block = rotated;
+        rotated_block.pos.x += 1;
+        if !self.check_collision(&rotated_block) {
+            self.block = rotated_block;
             return;
         }
-        rotated.pos.x -= 2;
-        if !self.is_block_collision(&rotated) {
-            self.block = rotated;
+        rotated_block.pos.x -= 2;
+        if !self.check_collision(&rotated_block) {
+            self.block = rotated_block;
         }
     }
 
@@ -98,55 +98,40 @@ impl Board {
         match dir {
             Dir::Up => false,
             Dir::Down => {
-                if self.is_collision(0, 1) {
+                let mut moved_block = self.block;
+                moved_block.pos.y += 1;
+                if self.check_collision(&moved_block) {
                     self.drop_block();
                     self.try_clear();
                     self.block = Block::new(BlockType::rand(), WIDTH as isize / 2, 0);
-                    if self.is_collision(0, 0) {
+                    if self.check_collision(&self.block) {
                         return true;
                     }
                 } else {
-                    self.block.pos.y += 1;
+                    self.block = moved_block;
                 }
                 false
             }
             Dir::Left => {
-                if !self.is_collision(-1, 0) {
-                    self.block.pos.x -= 1
+                let mut moved_block = self.block;
+                moved_block.pos.x -= 1;
+                if !self.check_collision(&moved_block) {
+                    self.block = moved_block;
                 }
                 false
             }
             Dir::Right => {
-                if !self.is_collision(1, 0) {
-                    self.block.pos.x += 1
+                let mut moved_block = self.block;
+                moved_block.pos.x += 1;
+                if !self.check_collision(&moved_block) {
+                    self.block = moved_block;
                 }
                 false
             }
         }
     }
 
-    fn is_collision(&self, dx: isize, dy: isize) -> bool {
-        for y in 0..4 {
-            for x in 0..4 {
-                if self.block.cells[y][x] {
-                    let abs_x = self.block.pos.x + x as isize + dx;
-                    let abs_y = self.block.pos.y + y as isize + dy;
-
-                    if abs_y >= HEIGHT as isize
-                        || abs_y < 0
-                        || abs_x >= WIDTH as isize
-                        || abs_x < 0
-                        || self.cells[abs_y as usize][abs_x as usize]
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        false
-    }
-
-    fn is_block_collision(&self, block: &Block) -> bool {
+    fn check_collision(&self, block: &Block) -> bool {
         for y in 0..4 {
             for x in 0..4 {
                 if block.cells[y][x] {

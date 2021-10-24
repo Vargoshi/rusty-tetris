@@ -1,4 +1,6 @@
-use crate::draw::draw_text;
+use sdl2::{rect::Rect, render::Canvas, video::Window};
+
+
 
 pub enum BlockType {
     Square,
@@ -22,19 +24,11 @@ impl BlockType {
     }
 }
 
-const WIDTH: usize = 4;
-const HEIGHT: usize = 4;
+pub const BLOCK_SIZE: usize = 4;
 
 #[derive(Clone, Copy)]
 pub struct Block {
-    pub pos: Pos,
-    pub cells: [[bool; WIDTH]; HEIGHT],
-}
-
-#[derive(Clone, Copy)]
-pub struct Pos {
-    pub x: isize,
-    pub y: isize,
+    pub cells: [[bool; BLOCK_SIZE ]; BLOCK_SIZE ],
 }
 
 #[allow(dead_code)]
@@ -44,9 +38,8 @@ pub enum RotDir {
 }
 
 impl Block {
-    pub fn new(variant: BlockType, x: isize, y: isize) -> Self {
+    pub fn new(variant: BlockType) -> Self {
         Self {
-            pos: Pos { x, y },
             cells: match variant {
                 BlockType::Square => [
                     [false, false, false, false],
@@ -101,30 +94,32 @@ impl Block {
 
         Self {
             cells: rotated,
-            pos: self.pos,
         }
     }
 
-    pub fn draw(&self, pos_x: isize, pos_y: isize) -> crossterm::Result<()> {
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
+    pub fn draw(&self, canvas: &mut Canvas<Window>, rect: Rect) -> Result<(), String> {
+        let cell_w = rect.w / BLOCK_SIZE as i32;
+        let cell_h = rect.h / BLOCK_SIZE as i32;
+        for y in 0..BLOCK_SIZE {
+            for x in 0..BLOCK_SIZE {
                 if self.cells[y][x] {
-                    draw_text(
-                        self.pos.x + x as isize + pos_x as isize,
-                        self.pos.y + y as isize + pos_y as isize,
-                        "#",
-                    )?;
+                    canvas.set_draw_color(sdl2::pixels::Color::RGBA(200, 0, 0, 255));
+                      canvas.fill_rect(Rect::new(
+                        rect.x + x as i32 * cell_w + 2,
+                        rect.y + y as i32 * cell_h + 2,
+                        cell_w as u32 - 4,
+                        cell_h as u32 - 4,
+                      ))?;
                 }
             }
         }
-
         Ok(())
     }
 }
 
 #[test]
 fn rotate_block() {
-    let mut block = Block::new(BlockType::L, 0, 0);
+    let mut block = Block::new(BlockType::L);
     block = block.rotate(RotDir::Clockwise);
     assert_eq!(
         block.cells,
